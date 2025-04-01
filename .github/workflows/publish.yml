@@ -2,7 +2,7 @@ name: Build and Push to Azure Container Registry
 
 on:
   push:
-    branches: [ main ]  # or 'master', depending on your repo
+    branches: [ master ]  # Use 'main' if your branch is named 'main'
 
 jobs:
   build-and-push:

@@ -7,6 +7,12 @@ on:
 jobs:
   build-and-push:
     runs-on: ubuntu-latest
+    env:
+      VERSION: ${{github.sha}}
+      REGISTRY_URL: ${{ secrets.REGISTRY_URL }}
+      REGISTRY_USERNAME: ${{ secrets.REGISTRY_USERNAME }}
+      REGISTRY_PASSWORD: ${{ secrets.REGISTRY_PASSWORD }}
+
 
     steps:
       - name: Checkout code
@@ -24,10 +30,26 @@ jobs:
       - name: Run unit tests
         run: mvn test
 
-      - name: Login to Azure Container Registry
-        run: echo "${{ secrets.REGISTRY_PASSWORD }}" | docker login ${{ secrets.REGISTRY_URL }} -u ${{ secrets.REGISTRY_USERNAME }} --password-stdin
 
-      - name: Build and push Docker image to ACR
+      - name: Publish the image to GitHub Container Registry
         run: |
-          docker build -t ${{ secrets.REGISTRY_URL }}/arithmetic-service:latest .
-          docker push ${{ secrets.REGISTRY_URL }}/arithmetic-service:latest
+         
+          echo "${{ secrets.ACCESS_TOKEN }}" | docker login ghcr.io -u Krisha34 --password-stdin
+
+          docker build -t ghcr.io/Krisha34/arithmetic-service:${{ env.VERSION }} .
+
+          docker push ghcr.io/Krisha34/arithmetic-service:${{ env.VERSION }}
+
+      - name: Publish the image to Azure Container Registry
+        run: |
+          
+          echo "${{ secrets.REGISTRY_PASSWORD }}" | docker login ${{ secrets.REGISTRY_URL }} -u ${{ secrets.REGISTRY_USERNAME }} --password-stdin
+
+          
+          docker tag ghcr.io/YOUR_GITHUB_USERNAME/arithmetic-service:${{ env.VERSION }} ${{ secrets.REGISTRY_URL }}/arithmetic-service:${{ env.VERSION }}
+          docker push ${{ secrets.REGISTRY_URL }}/arithmetic-service:${{ env.VERSION }}
+      - uses: tale/kubectl-action@v1
+        with:
+          base64-kube-config: ${{ secrets.KUBE_CONFIG }}
+      - name: Deploy
+        run: ./deploy.sh

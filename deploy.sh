@@ -6,4 +6,3 @@ set -u
 : "${VERSION:=v1.0.0}"
 
 envsubst < ./deploy.yaml | kubectl apply -f -
-bash deploy.sh

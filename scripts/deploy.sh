@@ -5,4 +5,4 @@ set -u
 : "${REGISTRY_URL:=practicum7krisha.azurecr.io}"
 : "${VERSION:=v1.0.0}"
 
-envsubst < ./deploy.yaml | kubectl apply -f -
+envsubst < ./kubernetes/deploy.yaml | kubectl apply -f -
